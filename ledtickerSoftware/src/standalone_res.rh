@@ -1,0 +1,4 @@
+#define IDD_SELECT 500
+#define IDC_GAMELIST 600
+#define IDC_PORT 601
+#define IDC_EDIT 602

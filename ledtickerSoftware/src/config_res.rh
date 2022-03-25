@@ -1,0 +1,5 @@
+#define IDDCONFIG 100
+#define IDIDENTIFY 200
+#define IDSCAN 201
+#define IDTEST 202
+#define IDLIST 205

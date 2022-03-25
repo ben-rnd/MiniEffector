@@ -1,0 +1,6 @@
+*.swp
+*.o
+*.exe
+bemanitools-sdk/*/
+*.dll
+*.zip

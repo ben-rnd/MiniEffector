@@ -1,0 +1,3 @@
+#define IDD_FLASH 500
+#define IDC_PORT 601
+#define IDC_EDIT 602
