@@ -194,15 +194,13 @@ void handleSerial(){
       ledUpdate = true;
       ledState = Serial.read();
       lights(ledState);
-      
-    }else {
-      if(inChar == '~'){
-        sendVals = true;
-      }
-      if (inChar == '@'){
-        readingSeg = true;
-        newString = String();
-      }
+    }
+    if(inChar == '~'){
+      sendVals = true;
+    }
+    if (inChar == '@'){
+      readingSeg = true;
+      newString = String();
     }
   }
 }

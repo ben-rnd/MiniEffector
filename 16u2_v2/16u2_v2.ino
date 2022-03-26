@@ -54,18 +54,15 @@ void loop() {
   if ((millis() - lastHidUpdate) >= 1000) {
     //do react code here
     if (oldButtonState != report.buttons) {
-      Serial.println("HELLO");
       lights(report.buttons);
       oldButtonState=report.buttons;
-      oldLightState = report.buttons;
     }
   } else {
     //do HID code
     if (oldLightState != hidLedState) {
-      sendLED =true;
-      lights(hidLedState);
+      uint16_t sendstate = hidLedState;
+      lights(sendstate);
       oldLightState = hidLedState;
-      oldButtonState = hidLedState;
     }
   }
 
@@ -75,6 +72,10 @@ void loop() {
 }
 
 void lights(uint16_t lightDesc) {
+    Serial1.write('%');
+    Serial1.write(lightDesc);
+    Serial1.write('%');
+    Serial1.write(lightDesc);
     Serial1.write('%');
     Serial1.write(lightDesc);
     Serial1.flush();
