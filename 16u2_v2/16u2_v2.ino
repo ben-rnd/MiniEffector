@@ -18,7 +18,7 @@ bool readyToRead = false;
 
 int timer = 0;
 int counter = 0;
-bool sendLED =true;
+bool sendLED = true;
 
 volatile uint16_t oldLightState = 2;
 volatile uint16_t oldButtonState = 2;
@@ -55,7 +55,7 @@ void loop() {
     //do react code here
     if (oldButtonState != report.buttons) {
       lights(report.buttons);
-      oldButtonState=report.buttons;
+      oldButtonState = report.buttons;
     }
   } else {
     //do HID code
@@ -72,13 +72,9 @@ void loop() {
 }
 
 void lights(uint16_t lightDesc) {
-    Serial1.write('%');
-    Serial1.write(lightDesc);
-    Serial1.write('%');
-    Serial1.write(lightDesc);
-    Serial1.write('%');
-    Serial1.write(lightDesc);
-    Serial1.flush();
+  Serial1.write('%');
+  Serial1.write(lightDesc);
+  Serial1.flush();
 }
 
 void GetSliders() {

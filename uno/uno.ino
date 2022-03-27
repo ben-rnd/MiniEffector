@@ -1,20 +1,20 @@
 
 /**
- * seg reference for tlc pin outputs
- * 
-*        --0--   --15-- 
-*       | \    |    / |
-*       3  2   1  14 13
-*       |   \  |  /   |
-*        --4--   --12-
-*       |   /  |  \   |
-*       7  6   5  11  10
-*       | /    |    \ |
- *       --8--   --9-- 
- * 
- * 
- * 
- */
+   seg reference for tlc pin outputs
+
+         --0--   --15--
+        | \    |    / |
+        3  2   1  14 13
+        |   \  |  /   |
+         --4--   --12-
+        |   /  |  \   |
+        7  6   5  11  10
+        | /    |    \ |
+         --8--   --9--
+
+
+
+*/
 
 #include "Tlc5940.h"
 #include <Adafruit_NeoPixel.h>
@@ -27,8 +27,8 @@
 #define REFRESH 300
 #define DEADZONE 1
 #define NO_OF_LEDS 4
-int timer =0;
-int count =0;
+int timer = 0;
+int count = 0;
 
 //74hc595 pin setup
 //
@@ -65,14 +65,14 @@ int sliderCount = 0;
 
 uint16_t ledState = 0;
 bool ledUpdate = false;
-unsigned long lastLedUpdate=0;
+unsigned long lastLedUpdate = 0;
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(4, A0, NEO_GRB + NEO_KHZ800);
 
 
 void setup() {
   Tlc.init(0);
-  
+
   pinMode(OE, OUTPUT);
   pinMode(clockPin, OUTPUT);
   pinMode(dataPin, OUTPUT);
@@ -85,7 +85,7 @@ void setup() {
   strip.setBrightness(100);
   strip.begin();
 
-  
+
   delay(1000); //let USB MCU setup
   // put your setup code here, to run once:
   Serial.begin(115200);
@@ -95,171 +95,174 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   handleSerial();
-  if(sendVals){
+  if (sendVals) {
     SendSliderVals();
   }
   timer++;
-  if(timer >=200){
+  if (timer >= 200) {
     count ++;
-    timer =0;
+    timer = 0;
   }
   updateSeg();
 
   delayMicroseconds(REFRESH);
 }
 
-void lights(uint16_t lightState){
-    for(int i =0; i < NO_OF_LEDS; i++){
-       if((lightState>>i)&1){
-          strip.setPixelColor( i, strip.Color(255, 0, 0));
-       }else{
-          strip.setPixelColor( i, strip.Color(0, 0, 0));
-       }
+void lights(uint16_t lightState) {
+  for (int i = 0; i < NO_OF_LEDS; i++) {
+    if ((lightState >> i) & 1) {
+      strip.setPixelColor( i, strip.Color(255, 0, 0));
+    } else {
+      strip.setPixelColor( i, strip.Color(0, 0, 0));
     }
-    strip.show();
+  }
+  strip.show();
 }
 
-void GetSliderVals(){
-  switch(sliderCount){
+void GetSliderVals() {
+  switch (sliderCount) {
     case 0:
-      vefxState = analogRead(VEFX)/4;
+      vefxState = analogRead(VEFX) / 4;
       sliderCount++;
       break;
     case 1:
-      lowEqState = analogRead(LOWEQ)/4;
+      lowEqState = analogRead(LOWEQ) / 4;
       sliderCount++;
       break;
     case 2:
-      hiEqState = analogRead(HIEQ)/4;
+      hiEqState = analogRead(HIEQ) / 4;
       sliderCount++;
       break;
     case 3:
-      filterState = analogRead(FILTER)/4;
+      filterState = analogRead(FILTER) / 4;
       sliderCount++;
       break;
     case 4:
-      playVolState = analogRead(PLAYVOL)/4;
+      playVolState = analogRead(PLAYVOL) / 4;
       sliderCount = 0;
       break;
   }
 }
 
-void SendSliderVals(){
-    GetSliderVals();
-    //only send slider update if there is a change and USB MCU asking for update
-    if(abs(vefxState-oldvefxState)>DEADZONE){
-     SendAnalogs();
-    }else if(abs(lowEqState-oldlowEqState)>DEADZONE){
-      SendAnalogs();
-    }else if(abs(hiEqState-oldhiEqState)>DEADZONE){
-     SendAnalogs();
-    }else if(abs(filterState-oldfilterState)>DEADZONE){
-      SendAnalogs();
-    }else if(abs(playVolState-oldplayVolState)>DEADZONE){
-      SendAnalogs();
-    }
+void SendSliderVals() {
+  GetSliderVals();
+  //only send slider update if there is a change and USB MCU asking for update
+  if (abs(vefxState - oldvefxState) > DEADZONE) {
+    SendAnalogs();
+  } else if (abs(lowEqState - oldlowEqState) > DEADZONE) {
+    SendAnalogs();
+  } else if (abs(hiEqState - oldhiEqState) > DEADZONE) {
+    SendAnalogs();
+  } else if (abs(filterState - oldfilterState) > DEADZONE) {
+    SendAnalogs();
+  } else if (abs(playVolState - oldplayVolState) > DEADZONE) {
+    SendAnalogs();
+  }
 }
 
-void SendAnalogs(){
-    Serial.write(vefxState);
-    Serial.write(lowEqState);
-    Serial.write(hiEqState);
-    Serial.write(filterState);
-    Serial.write(playVolState);
-    oldvefxState = vefxState;
-    oldlowEqState = lowEqState;
-    oldhiEqState = hiEqState;
-    oldfilterState = filterState;
-    oldplayVolState = playVolState;
-    sendVals = false;
+void SendAnalogs() {
+  Serial.write(vefxState);
+  Serial.write(lowEqState);
+  Serial.write(hiEqState);
+  Serial.write(filterState);
+  Serial.write(playVolState);
+  oldvefxState = vefxState;
+  oldlowEqState = lowEqState;
+  oldhiEqState = hiEqState;
+  oldfilterState = filterState;
+  oldplayVolState = playVolState;
+  sendVals = false;
 
 }
 String newString = String();
-void handleSerial(){
-  if(Serial.available() > 0){
+void handleSerial() {
+  if (Serial.available() > 0) {
     inChar = Serial.read();
-    if(readingSeg == true){
-      if(inChar == '~'){
+    if (ledUpdate) {
+      ledState = inChar;
+      lights(ledState);
+      ledUpdate  = false;
+    }
+    if (readingSeg) {
+      if (inChar == '~') {
         sendVals = true;
-      }else{
-        if(inChar == '#' || Serial.available() <= 0){
-           inString = newString;
-           readingSeg == false;
-        }else{
+      } else {
+        if (inChar == '#' || Serial.available() <= 0) {
+          inString = newString;
+          readingSeg == false;
+        } else {
           newString += inChar;
         }
       }
     }
-    if (inChar == '%'){
+    if (inChar == '%') {
       ledUpdate = true;
-      ledState = Serial.read();
-      lights(ledState);
     }
-    if(inChar == '~'){
+    if (inChar == '~') {
       sendVals = true;
     }
-    if (inChar == '@'){
+    if (inChar == '@') {
       readingSeg = true;
       newString = String();
     }
   }
 }
 
-void EstablishConnection(){
-  while(Serial.available() <=0){
+void EstablishConnection() {
+  while (Serial.available() <= 0) {
     Serial.print('A');
     delay(300);
   }
   digitalWrite(OE, LOW);
 }
 
-void updateSeg(){
+void updateSeg() {
   //set the char before turning the segment on
-  setTlcChar(inString.charAt(segCount+1));
+  setTlcChar(inString.charAt(segCount + 1));
 
   // The bit shifter only supports 8 lights, we need 9 for the display,
   // so pin 5 on the arduino is used. Seems to work fine so far.
-  if(!(segCount>=8)){
-      digitalWrite(latchPin, LOW);
-      shiftOut(dataPin, clockPin, MSBFIRST, 1<<segCount);
-      digitalWrite(latchPin, HIGH);
-      segCount++;
+  if (!(segCount >= 8)) {
+    digitalWrite(latchPin, LOW);
+    shiftOut(dataPin, clockPin, MSBFIRST, 1 << segCount);
+    digitalWrite(latchPin, HIGH);
+    segCount++;
   }
-  else{
-    segCount=0;
+  else {
+    segCount = 0;
     displayOff();
     digitalWrite(5, 1);
   }
 }
 
-void displayOff(){
+void displayOff() {
   digitalWrite(5, 0);
   digitalWrite(latchPin, LOW);
   shiftOut(dataPin, clockPin, MSBFIRST, B00000000);
   digitalWrite(latchPin, HIGH);
 }
 
-//this was used for testing 
-void setTLC(int SegNum){
+//this was used for testing
+void setTLC(int SegNum) {
   displayOff();
   Tlc.clear();
   setTlcChar('c');
-  Tlc.update();  
+  Tlc.update();
   delay(1);
-  if(count >= 16){
-    count =0;
+  if (count >= 16) {
+    count = 0;
   }
 }
 
 
 /* This is the tlc "font"
- * can be improved, currently a mandatory delay(1) to allow the tlc to update and stop ghosting
- * Maybe a custom TLC library could imrpove this, as a smaller delay here means a longer delay in the loop 
- * which would increase led brighness (more time on per loop)
- */
-void setTlcChar(char letter){
+   can be improved, currently a mandatory delay(1) to allow the tlc to update and stop ghosting
+   Maybe a custom TLC library could imrpove this, as a smaller delay here means a longer delay in the loop
+   which would increase led brighness (more time on per loop)
+*/
+void setTlcChar(char letter) {
   displayOff();
-  switch(letter){
+  switch (letter) {
     case 'A':
       Tlc.set(0, 4095);
       Tlc.set(1, 0);
@@ -1035,7 +1038,7 @@ void setTlcChar(char letter){
       Tlc.set(14, 0);
       Tlc.set(15, 0);
       break;
-    //q is used for ' 
+    //q is used for '
     case 'q':
       Tlc.set(0, 0);
       Tlc.set(1, 0);
@@ -1259,6 +1262,6 @@ void setTlcChar(char letter){
       Tlc.set(15, 0);
       break;
   }
-  Tlc.update(); 
-  delay(1); 
+  Tlc.update();
+  delay(1);
 }
